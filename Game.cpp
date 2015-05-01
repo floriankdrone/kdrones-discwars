@@ -44,7 +44,6 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
                 
                 m_pGameStateMachine = new GameStateMachine();
                 m_pGameStateMachine->changeState(new MainMenuState());
-                // m_pGameStateMachine->changeState(new PlayState());
                 
             }
             else
@@ -93,9 +92,6 @@ void Game::clean()
 void Game::handleEvents()
 {
     TheInputHandler::Instance()->update();
-    if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_RETURN)) {
-        m_pGameStateMachine->changeState(new PlayState());
-    }
 }
 
 void Game::update()

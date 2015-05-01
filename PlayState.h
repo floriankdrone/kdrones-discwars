@@ -14,12 +14,14 @@
 
 #include "GameState.h"
 
+#include "SDLGameObject.h"
+
 class GameObject;
 
 class PlayState : public GameState
 {
 public:
-    PlayState(){}
+    PlayState(int numOfPlayers){ m_numOfPlayers = numOfPlayers; }
     ~PlayState(){}
     
     virtual void update();
@@ -30,7 +32,12 @@ public:
     
     virtual std::string getStateID() const { return s_playID; }
     
+    bool checkCollision(SDLGameObject* player, SDLGameObject* player2);
+    bool outOfBounds(SDLGameObject* player);
+    
 private:
+    
+    int m_numOfPlayers;
     
     static const std::string s_playID;
     std::vector<GameObject*> m_gameObjects;

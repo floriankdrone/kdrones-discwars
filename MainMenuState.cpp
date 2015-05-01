@@ -76,7 +76,7 @@ bool MainMenuState::onExit()
 void MainMenuState::s_menuToPlay()
 {
     std::cout << "Play button clicked" << std::endl;
-    TheGame::Instance()->getStateMachine()->changeState(new PlayState());
+    TheGame::Instance()->getStateMachine()->changeState(new PlayState(1));
 }
 
 void MainMenuState::s_exitFromMenu()

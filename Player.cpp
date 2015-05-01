@@ -160,9 +160,6 @@ bool Player::discHasReturned()
 
 bool Player::goRight()
 {
-    if (m_position.getX() + m_width > m_zoneWidthEnd) {
-        dies();
-    }
     m_velocity.setX(2);
     return true; 
 }

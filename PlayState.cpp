@@ -9,7 +9,11 @@
 #include <iostream>
 
 #include "PlayState.h"
+
+#include "GameOverState.h"
+
 #include "Game.h"
+
 #include <SDL2_mixer/SDL_mixer.h>
 
 const std::string PlayState::s_playID = "PLAY";
@@ -18,7 +22,19 @@ void PlayState::update()
 {
     for (int i = 0; i < m_gameObjects.size(); i++) {
         m_gameObjects[i]->update();
+        
+        if (outOfBounds(dynamic_cast<SDLGameObject*>(m_gameObjects[i]))) {
+            TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player fell down!"));
+        }
     }
+    /*
+    if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[0]), dynamic_cast<SDLGameObject*>(m_gameObjects[1]))) {
+        TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 loses!"));
+    }
+    
+    if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[1]), dynamic_cast<SDLGameObject*>(m_gameObjects[0]))) {
+        TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 2 loses!"));
+    }*/
 }
 
 void PlayState::render()
@@ -72,5 +88,22 @@ bool PlayState::onExit()
     m_gameObjects.clear();
     TheTextureManager::Instance()->clearFromTextureMap("player");
     std::cout << "Exiting PlayState" << std::endl;
+    return true;
+}
+
+bool PlayState::checkCollision(SDLGameObject* player, SDLGameObject* player2)
+{
+    return false;
+}
+
+bool PlayState::outOfBounds(SDLGameObject* player)
+{
+    int right = TheGame::Instance()->getWindowWidth() / 1.5;
+    int left = TheGame::Instance()->getWindowWidth() / 2.5;
+    
+    if (player->getPosition().getX() < left || player->getPosition().getX() > right) {
+        return false;
+    }
+    
     return true;
 }
