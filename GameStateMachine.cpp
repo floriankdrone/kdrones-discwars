@@ -31,7 +31,6 @@ void GameStateMachine::changeState(GameState* pState)
         }
         
         if (m_gameStates.back()->onExit()) {
-            delete m_gameStates.back();
             m_gameStates.pop_back();
         }
     }
@@ -44,7 +43,6 @@ void GameStateMachine::popState()
 {
     if (!m_gameStates.empty()) {
         if (m_gameStates.back()->onExit()) {
-            delete m_gameStates.back();
             m_gameStates.pop_back();
         }
     }
@@ -54,7 +52,6 @@ void GameStateMachine::update()
 {
     if(!m_gameStates.empty())
     {
-        //std::cout << "State id is " << m_gameStates.back()->getStateID() << std::endl;
         m_gameStates.back()->update();
     } else {
         std::cout << "No more game states " << std::endl;

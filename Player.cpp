@@ -50,7 +50,7 @@ void Player::draw()
 void Player::update()
 {
     if (m_health <= 0) {
-        std::cout << "Player died, game will end now. Thank you for playing" << std::endl;
+        std::cout << "Player died, game will end now. Thank you for playing bitch" << std::endl;
         TheGame::Instance()->quit();
     }
     
