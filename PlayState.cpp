@@ -9,8 +9,9 @@
 #include <iostream>
 
 #include "PlayState.h"
-
 #include "GameOverState.h"
+#include "SampleEnemy.h"
+#include "Disc.h"
 
 #include "Game.h"
 
@@ -27,14 +28,20 @@ void PlayState::update()
             TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player fell down!"));
         }
     }
-    /*
+    
     if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[0]), dynamic_cast<SDLGameObject*>(m_gameObjects[1]))) {
         TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 loses!"));
     }
-    
-    if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[1]), dynamic_cast<SDLGameObject*>(m_gameObjects[0]))) {
-        TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 2 loses!"));
-    }*/
+    switch (m_numOfPlayers) {
+        case 2:
+            if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[1]), dynamic_cast<SDLGameObject*>(m_gameObjects[2]))) {
+                TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 loses!"));
+            }
+            break;
+            
+        default:
+            break;
+    }
 }
 
 void PlayState::render()
@@ -59,21 +66,23 @@ bool PlayState::onEnter()
     
     m_gameObjects.push_back(player);
     
-    Mix_OpenAudio(22050, AUDIO_S16, 2, 4096);
-    
-    Mix_Chunk* sound = Mix_LoadWAV("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/proceed.aiff");
-
-    Mix_Chunk* song = Mix_LoadWAV("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/Daft_Punk-Arena.wav");
-    
-    if (song == 0 || sound == 0) {
-        std::cout << "Could not load music - " << Mix_GetError() << std::endl;
-        return false;
-    } else {
-        std::cout << "song loaded!" << std::endl;
+    switch (m_numOfPlayers) {
+        case 1:
+            setupFor1Player();
+            break;
+        case 2:
+            setupFor2Players();
+        default:
+            break;
     }
     
-    Mix_PlayChannel(-1, song, -1);
-    Mix_FadeInChannel(-1, sound, 0, 5000);
+    TheSoundManager::Instance()->load("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/proceed.aiff", "transitionToGames", SOUND_SFX);
+    
+    TheSoundManager::Instance()->load("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/Daft_Punk-Arena.wav", "gameSong", SOUND_MUSIC);
+    
+    TheSoundManager::Instance()->playSound("transitionToGames", 0);
+    TheSoundManager::Instance()->playMusic("gameSong", -1);
+    
     std::cout << "Entering PlayState" << std::endl;
     
     return true;
@@ -87,12 +96,21 @@ bool PlayState::onExit()
     
     m_gameObjects.clear();
     TheTextureManager::Instance()->clearFromTextureMap("player");
+    TheSoundManager::Instance()->stopMusic();
     std::cout << "Exiting PlayState" << std::endl;
     return true;
 }
 
 bool PlayState::checkCollision(SDLGameObject* player, SDLGameObject* player2)
 {
+    Disc* disc = dynamic_cast<Player*>(player)->getMyDisc();
+    if (disc->getPosition().getX() + disc->getWidth() >= player2->getPosition().getX()
+        && disc->getPosition().getX() <= player2->getPosition().getX() + player2->getWidth()
+        && disc->getPosition().getY() + disc->getHeight() >= player2->getPosition().getY()
+        && disc->getPosition().getY() <= player2->getPosition().getY() + player2->getHeight()) {
+        std::cout << "collsion detected" << std::endl;
+        return true;
+    }
     return false;
 }
 
@@ -106,4 +124,18 @@ bool PlayState::outOfBounds(SDLGameObject* player)
     }
     
     return true;
+}
+
+void PlayState::setupFor1Player()
+{
+    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/rider.png", "sampleEnemy", TheGame::Instance()->getRenderer())) {
+        std::cout << "sample enemy was not found." << std::endl;
+    }
+    
+    GameObject* sampleEnemy = new SampleEnemy(new LoaderParams(550, 150, 33, 44, "sampleEnemy"));
+    m_gameObjects.push_back(sampleEnemy);
+}
+
+void PlayState::setupFor2Players()
+{
 }

@@ -39,8 +39,8 @@ bool GameOverState::onEnter()
         return false;
     }
     
-    GameObject* button1 = new MenuButton(new LoaderParams(200, 200, 200, 80, "mainbutton"), s_gameOverToMain);
-    GameObject* button2 = new MenuButton(new LoaderParams(200, 300, 200, 80, "restartbutton"), s_restartToPlay);
+    GameObject* button1 = new MenuButton(new LoaderParams(250, 100, 200, 80, "mainbutton"), s_gameOverToMain);
+    GameObject* button2 = new MenuButton(new LoaderParams(250, 200, 200, 80, "restartbutton"), s_restartToPlay);
     
     m_gameObjects.push_back(button1);
     m_gameObjects.push_back(button2);

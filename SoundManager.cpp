@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+TheSoundManager* SoundManager::s_pInstance = 0;
+
 SoundManager::SoundManager()
 {
     Mix_OpenAudio(22050, AUDIO_S16, 2, 4096);
@@ -50,6 +52,11 @@ void SoundManager::playMusic(std::string id, int loop)
 void SoundManager::playSound(std::string id, int loop)
 {
     Mix_PlayChannel(-1, m_sfxs[id], loop);
+}
+
+void SoundManager::stopMusic()
+{
+    Mix_HaltMusic();
 }
 
 SoundManager::~SoundManager()

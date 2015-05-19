@@ -16,6 +16,7 @@
 #include "SDLGameObject.h"
 #include "Player.h"
 #include "InputHandler.h"
+#include "SoundManager.h"
 #include "GameStateMachine.h"
 
 class Game

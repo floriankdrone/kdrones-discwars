@@ -27,10 +27,11 @@ public:
     void update();
     void clean();
     
+    Disc* getMyDisc();
+    
 private:
     
     void handleInput();
-    void dies();
     
     bool goRight();
     bool goLeft();
@@ -38,8 +39,6 @@ private:
     bool goDown();
     int m_zoneWidthStart;
     int m_zoneWidthEnd;
-    
-    int m_health;
     
     bool throwDisc();
     bool discHasReturned();

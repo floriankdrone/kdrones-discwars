@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include "Player.h"
 #include "InputHandler.h"
 #include "Game.h"
 #include <SDL2_mixer/SDL_mixer.h>
@@ -23,7 +22,6 @@ Player::Player(const LoaderParams* pParams, int zoneWidthStart, int zoneWidthEnd
     hasDisc = true;
     m_zoneWidthEnd = zoneWidthEnd;
     m_zoneWidthStart = zoneWidthStart;
-    m_health = 100;
 }
 
 Player::~Player()
@@ -49,10 +47,6 @@ void Player::draw()
 
 void Player::update()
 {
-    if (m_health <= 0) {
-        std::cout << "Player died, game will end now. Thank you for playing bitch" << std::endl;
-        TheGame::Instance()->quit();
-    }
     
     handleInput();
     
@@ -123,7 +117,6 @@ bool Player::throwDisc()
             Vector2D test(m_position.getX() + m_width + DISC_RAD, m_position.getY()+(m_height/2) - (DISC_RAD/2));
             myDisc->justThrown(test);
         }
-        //Vector2D armPosition(m_position.getX() + (m_width / 2) - (DISC_RAD / 2), m_position.getY()+(m_height/2) - (DISC_RAD/2));
         hasDisc = false;
         return true;
     }
@@ -191,7 +184,7 @@ bool Player::goDown()
     return true;
 }
 
-void Player::dies()
+Disc* Player::getMyDisc()
 {
-    m_health = 0;
+    return myDisc;
 }

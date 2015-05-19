@@ -37,8 +37,10 @@ public:
     
 private:
     
-    int m_numOfPlayers;
+    void setupFor1Player();
+    void setupFor2Players();
     
+    int m_numOfPlayers;
     static const std::string s_playID;
     std::vector<GameObject*> m_gameObjects;
 };
