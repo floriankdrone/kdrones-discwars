@@ -10,8 +10,9 @@
 
 #include "Disc.h"
 
-#include "InputHandler.h"
 #include "Game.h"
+#include "InputHandler.h"
+
 #include <SDL2_mixer/SDL_mixer.h>
 
 #define LENGTH 7
@@ -79,13 +80,28 @@ void Disc::clean()
     SDLGameObject::clean();
 }
 
-void Disc::justThrown(Vector2D& startingPosition)
+void Disc::justThrown(Vector2D& startingPosition, int type)
 {
     m_position = startingPosition;
-    Vector2D* target = TheInputHandler::Instance()->getMousePosition();
     
-    m_velocity = *target - m_position;
-    setDirection(m_velocity.getX(), m_velocity.getY());
+    switch (type) {
+        case 0:
+        {
+            Vector2D* target = TheInputHandler::Instance()->getMousePosition();
+            
+            m_velocity = *target - m_position;
+            setDirection(m_velocity.getX(), m_velocity.getY());
+            break;
+        }
+        
+        case 1:
+        {
+            setDirection(TheInputHandler::Instance()->xvalue(0, 2), TheInputHandler::Instance()->yvalue(0, 2));
+        }
+            
+        default:
+            break;
+    }
 }
 
 void Disc::returnToPlayer(Vector2D& endingPosition)
@@ -140,11 +156,4 @@ void Disc::setDirection(float adjacentSide, float oppositeSide)
     float radian = atan2(oppositeSide, adjacentSide);
     m_velocity.setX(cosf(radian) * LENGTH);
     m_velocity.setY(sinf(radian) * LENGTH);
-}
-
-void Disc::changeArmPosition(float x)
-{
-    std::cout << "arm position is " << m_position.getX() << std::endl;
-    m_position.setX(x);
-    std::cout << "changed arm position to " << m_position.getX() << std::endl;
 }

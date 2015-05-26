@@ -16,11 +16,16 @@
 
 #define DISC_RAD 20
 
+enum InputControllerType {
+    KEYBOARD = 1,
+    CONTROLLER = 2
+};
+
 class Player : public SDLGameObject
 {
 public:
     
-    Player(const LoaderParams* pParams, int zoneWidthStart, int zoneWidthEnd);
+    Player(const LoaderParams* pParams, InputControllerType inputControllerType);
     ~Player();
     
     void draw();
@@ -37,14 +42,14 @@ private:
     bool goLeft();
     bool goUp();
     bool goDown();
-    int m_zoneWidthStart;
-    int m_zoneWidthEnd;
     
     bool throwDisc();
     bool discHasReturned();
     
     Disc* myDisc;
     bool hasDisc;
+    
+    InputControllerType m_inputControllerType;
     
 };
 

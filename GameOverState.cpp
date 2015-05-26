@@ -24,7 +24,7 @@ void GameOverState::s_gameOverToMain()
 
 void GameOverState::s_restartToPlay()
 {
-    TheGame::Instance()->getStateMachine()->changeState(new PlayState(1));
+    TheGame::Instance()->getStateMachine()->changeState(new PlayState(2));
 }
 
 bool GameOverState::onEnter()

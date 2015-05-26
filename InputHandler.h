@@ -40,6 +40,10 @@ public:
     
     void initialiseController();
     
+    void initialiseJoysticks();
+    
+    bool joysticksInitialised() { return m_bJoysticksInitialised; }
+    
     bool getMouseButtonState(int buttonNumber)
     {
         return m_mouseButtonStates[buttonNumber];
@@ -67,6 +71,14 @@ public:
         return false;
     }
     
+    bool getButtonStates(int joy, int buttonNumber)
+    {
+        return m_buttonStates[joy][buttonNumber];
+    }
+    
+    int xvalue(int joy, int stick);
+    int yvalue(int joy, int stick);
+    
     void reset();
     
 private:
@@ -88,6 +100,11 @@ private:
     std::vector<bool> m_mouseButtonStates;
     Vector2D* m_mousePosition;
     bool m_mouseReleased;
+    
+    bool m_bJoysticksInitialised;
+    std::vector<SDL_Joystick*> m_joysticks;
+    std::vector<std::pair<Vector2D*, Vector2D*>> m_joystickValues;
+    const int m_joystickDeadZone = 10000;
     
     const Uint8* m_keystate;
 };

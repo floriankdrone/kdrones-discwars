@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<ARENAS>
+    <ARENA id="default" maxNumOfPlayers="2" background="play_background1.png" width="700" height="400">
+        <WAYPOINTS>
+            <waypoint id="1">
+                <coordinate>
+                    <x>50</x>
+                    <y>200</y>
+                </coordinate>
+            </waypoint>
+            <waypoint id="2">
+                <coordinate>
+                    <x>550</x>
+                    <y>200</y>
+                </coordinate>
+            </waypoint>
+        </WAYPOINTS>
+        <DEADZONES>
+            <deadzone id="1" description="A big hole separating the platform between the 2 plateforms.">
+                <coordinate>
+                    <x>233</x>
+                    <y>0</y>
+                </coordinate>
+                <width>233</width>
+                <height>400</height>
+            </deadzone>
+        </DEADZONES>
+    </ARENA>
+</ARENAS>

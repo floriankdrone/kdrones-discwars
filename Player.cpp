@@ -14,14 +14,13 @@
 #include "Game.h"
 #include <SDL2_mixer/SDL_mixer.h>
 
-Player::Player(const LoaderParams* pParams, int zoneWidthStart, int zoneWidthEnd) : SDLGameObject(pParams)
+Player::Player(const LoaderParams* pParams, InputControllerType inputControllerType) : SDLGameObject(pParams)
 {
     std::cout << "Player created" << std::endl;
     m_currentFrame = 0;
+    m_inputControllerType = inputControllerType;
     myDisc = new Disc(new LoaderParams(m_position.getX() + (m_width / 2) - (DISC_RAD / 2), m_position.getY()+(m_height/2) - (DISC_RAD/2), DISC_RAD, DISC_RAD, "disc"));
     hasDisc = true;
-    m_zoneWidthEnd = zoneWidthEnd;
-    m_zoneWidthStart = zoneWidthStart;
 }
 
 Player::~Player()
@@ -31,8 +30,17 @@ Player::~Player()
 
 void Player::draw()
 {
-    Vector2D* target = TheInputHandler::Instance()->getMousePosition();
-    if (target->getX() < m_position.getX()) {
+    bool throwingSide;
+    if (m_inputControllerType == KEYBOARD) {
+        Vector2D* target = TheInputHandler::Instance()->getMousePosition();
+        throwingSide = (target->getX() < m_position.getX());
+    }
+    else if (m_inputControllerType == CONTROLLER)
+    {
+        int x = TheInputHandler::Instance()->xvalue(0, 2);
+        throwingSide = x > 0;
+    }
+    if (throwingSide) {
         TextureManager::Instance()->drawFrame(m_textureID, (Uint32)m_position.getX(), (Uint32)m_position.getY(), m_width, m_height, m_currentRow, m_currentFrame, TheGame::Instance()->getRenderer(), SDL_FLIP_HORIZONTAL);
     }
     else
@@ -54,8 +62,24 @@ void Player::update()
         myDisc->update();
         
         if (myDisc->shouldReturnToPlayer())  {
-            Vector2D armPosition(m_position.getX() + (m_width / 2) - (DISC_RAD / 2), m_position.getY()+(m_height/2) - (DISC_RAD/2));
-            myDisc->returnToPlayer(armPosition);
+            switch (m_inputControllerType) {
+                case KEYBOARD:
+                {
+                    Vector2D armPosition(m_position.getX() + (m_width / 2) - (DISC_RAD / 2), m_position.getY()+(m_height/2) - (DISC_RAD/2));
+                    myDisc->returnToPlayer(armPosition);
+                    break;
+                }
+                
+                case CONTROLLER:
+                {
+                    Vector2D armPosition(m_position.getX() - (m_width / 2) + (DISC_RAD / 2), m_position.getY()+(m_height/2) - (DISC_RAD/2));
+                    myDisc->returnToPlayer(armPosition);
+                    break;
+                }
+                    
+                default:
+                    break;
+            }
         }
         if (discHasReturned()) {
             myDisc->caughtBack();
@@ -77,23 +101,54 @@ void Player::handleInput()
     m_velocity.setX(0);
     m_velocity.setY(0);
     
-    if (TheInputHandler::Instance()->isMouseButtonReleased()) {
-        throwDisc();
-    }
-    if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_D)) {
-        goRight();
-    }
-    if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_A)) {
-        goLeft();
-    }
-    if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_W)) {
-        goUp();
-    }
-    if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_S)) {
-        goDown();
-    }
-    if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_SPACE)) {
-        myDisc->shouldReturnToPlayer(true);
+    switch (m_inputControllerType) {
+        case KEYBOARD:
+            if (TheInputHandler::Instance()->isMouseButtonReleased()) {
+                throwDisc();
+            }
+            if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_D)) {
+                goRight();
+            }
+            if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_A)) {
+                goLeft();
+            }
+            if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_W)) {
+                goUp();
+            }
+            if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_S)) {
+                goDown();
+            }
+            if (TheInputHandler::Instance()->isKeyDown(SDL_SCANCODE_SPACE)) {
+                myDisc->shouldReturnToPlayer(true);
+            }
+            break;
+        case CONTROLLER:
+            if (TheInputHandler::Instance()->joysticksInitialised()) {
+                if (TheInputHandler::Instance()->xvalue(0, 1) > 0 ) {
+                    goRight();
+                }
+                if (TheInputHandler::Instance()->xvalue(0, 1) < 0) {
+                    goLeft();
+                }
+                if (TheInputHandler::Instance()->yvalue(0, 1) > 0 ) {
+                    goDown();
+                }
+                if (TheInputHandler::Instance()->yvalue(0, 1) < 0) {
+                    goUp();
+                }
+                if (TheInputHandler::Instance()->getButtonStates(0, 0) == true) {
+                    myDisc->shouldReturnToPlayer(true);
+                }
+                if (TheInputHandler::Instance()->xvalue(0, 2) < 0 ||
+                    TheInputHandler::Instance()->xvalue(0, 2) > 0 ||
+                    TheInputHandler::Instance()->yvalue(0, 2) < 0 ||
+                    TheInputHandler::Instance()->yvalue(0, 2) > 0) {
+                    throwDisc();
+                }
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -102,20 +157,39 @@ bool Player::throwDisc()
     std::cout << "Will try to throw Disc" << std::endl;
     if (hasDisc)
     {
-        if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/disc1.png", "disc", TheGame::Instance()->getRenderer())) {
+        if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/disc1.png", "disc", TheGame::Instance()->getRenderer())) {
             std::cout << "Problem throwing disc" << std::endl;
             return false;
         }
-        Vector2D* target = TheInputHandler::Instance()->getMousePosition();
-        if (target->getX() < m_position.getX()) {
-            std::cout << "arm not the same" << std::endl;
-            Vector2D test(m_position.getX() - DISC_RAD, m_position.getY()+(m_height/2) - (DISC_RAD/2));
-            myDisc->justThrown(test);
+        bool throwingSide;
+        if (m_inputControllerType == KEYBOARD) {
+            Vector2D* target = TheInputHandler::Instance()->getMousePosition();
+            throwingSide = (target->getX() < m_position.getX());
+            if (throwingSide) {
+                std::cout << "arm not the same" << std::endl;
+                Vector2D test(m_position.getX() - DISC_RAD, m_position.getY()+(m_height/2) - (DISC_RAD/2));
+                myDisc->justThrown(test, 0);
+            }
+            else
+            {
+                Vector2D test(m_position.getX() + m_width + DISC_RAD, m_position.getY()+(m_height/2) - (DISC_RAD/2));
+                myDisc->justThrown(test, 0);
+            }
         }
-        else
+        else if (m_inputControllerType == CONTROLLER)
         {
-            Vector2D test(m_position.getX() + m_width + DISC_RAD, m_position.getY()+(m_height/2) - (DISC_RAD/2));
-            myDisc->justThrown(test);
+            int x = TheInputHandler::Instance()->xvalue(0, 2);
+            throwingSide = x < 0;
+            if (throwingSide) {
+                std::cout << "arm not the same" << std::endl;
+                Vector2D test(m_position.getX() - DISC_RAD, m_position.getY()+(m_height/2) - (DISC_RAD/2));
+                myDisc->justThrown(test, 1);
+            }
+            else
+            {
+                Vector2D test(m_position.getX() + m_width + DISC_RAD, m_position.getY()+(m_height/2) - (DISC_RAD/2));
+                myDisc->justThrown(test, 1);
+            }
         }
         hasDisc = false;
         return true;
@@ -153,13 +227,16 @@ bool Player::discHasReturned()
 
 bool Player::goRight()
 {
+    if (m_position.getX() > TheGame::Instance()->getWindowWidth() - m_width) {
+        return false;
+    }
     m_velocity.setX(2);
     return true; 
 }
 
 bool Player::goLeft()
 {
-    if (m_position.getX() < myDisc->getWidth() + m_zoneWidthStart) {
+    if (m_position.getX() < myDisc->getWidth()) {
         return false;
     }
     m_velocity.setX(-2);

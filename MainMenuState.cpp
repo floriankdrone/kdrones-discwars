@@ -46,8 +46,8 @@ bool MainMenuState::onEnter()
         return false;
     }
     
-    GameObject* button1 = new MenuButton(new LoaderParams(250, 75, 150, 75, "1playerplaybutton"), s_menuToPlay);
-    GameObject* button2 = new MenuButton(new LoaderParams(250, 150, 150, 75, "2playersplaybutton"), s_menuToPlay);
+    GameObject* button1 = new MenuButton(new LoaderParams(250, 75, 150, 75, "1playerplaybutton"), s_menuToPlayOnePlayer);
+    GameObject* button2 = new MenuButton(new LoaderParams(250, 150, 150, 75, "2playersplaybutton"), s_menuToPlayTwoPlayers);
     GameObject* button3 = new MenuButton(new LoaderParams(250, 225, 150, 75, "exitbutton"), s_exitFromMenu);
     
     m_gameObjects.push_back(button1);
@@ -73,10 +73,16 @@ bool MainMenuState::onExit()
     return true;
 }
 
-void MainMenuState::s_menuToPlay()
+void MainMenuState::s_menuToPlayOnePlayer()
 {
-    std::cout << "Play button clicked" << std::endl;
+    std::cout << "1 player game button clicked." << std::endl;
     TheGame::Instance()->getStateMachine()->changeState(new PlayState(1));
+}
+
+void MainMenuState::s_menuToPlayTwoPlayers()
+{
+    std::cout << "2 player game button clicked." << std::endl;
+    TheGame::Instance()->getStateMachine()->changeState(new PlayState(2));
 }
 
 void MainMenuState::s_exitFromMenu()

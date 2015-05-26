@@ -26,12 +26,11 @@ public:
     void update();
     void clean();
     
-    void justThrown(Vector2D& position);
+    void justThrown(Vector2D& position, int type);
     void bounce(int windowSide);
     void returnToPlayer(Vector2D& position);
     bool shouldReturnToPlayer() { return m_shouldReturnToPlayer; }
     void shouldReturnToPlayer(bool b) { m_shouldReturnToPlayer = b; }
-    void changeArmPosition(float x);
     
     void caughtBack();
     int getBounceCount()

@@ -31,7 +31,8 @@ public:
     virtual std::string getStateID() const { return s_menuID; }
 
 private:
-    static void s_menuToPlay();
+    static void s_menuToPlayOnePlayer();
+    static void s_menuToPlayTwoPlayers();
     static void s_exitFromMenu();
     
     static const std::string s_menuID;

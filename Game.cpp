@@ -41,6 +41,7 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
                 SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
 
                 TheInputHandler::Instance()->initialiseController();
+                TheInputHandler::Instance()->initialiseJoysticks();
                 
                 m_pGameStateMachine = new GameStateMachine();
                 m_pGameStateMachine->changeState(new MainMenuState());

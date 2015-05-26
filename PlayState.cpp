@@ -30,11 +30,11 @@ void PlayState::update()
     }
     
     if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[0]), dynamic_cast<SDLGameObject*>(m_gameObjects[1]))) {
-        TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 loses!"));
+        TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 wins!"));
     }
     switch (m_numOfPlayers) {
         case 2:
-            if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[1]), dynamic_cast<SDLGameObject*>(m_gameObjects[2]))) {
+            if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[1]), dynamic_cast<SDLGameObject*>(m_gameObjects[0]))) {
                 TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 loses!"));
             }
             break;
@@ -54,31 +54,34 @@ void PlayState::render()
 
 bool PlayState::onEnter()
 {
+    
     if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/play_background1.png", "background", TheGame::Instance()->getRenderer())) {
         return false;
     }
     
-    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/tron_player_small.png", "player", TheGame::Instance()->getRenderer())) {
+    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/tron_player_small.png", "player", TheGame::Instance()->getRenderer())) {
         return false;
     }
     
-    GameObject* player = new Player(new LoaderParams(50, 200, 20, 71, "player"), 0, (TheGame::Instance()->getWindowWidth() / 2.5));
+    GameObject* player = new Player(new LoaderParams(50, 200, 20, 71, "player"), KEYBOARD);
     
     m_gameObjects.push_back(player);
     
     switch (m_numOfPlayers) {
         case 1:
+            std::cout << "1 player game launched." << std::endl;
             setupFor1Player();
             break;
         case 2:
+            std::cout << "2 player game launched." << std::endl;
             setupFor2Players();
         default:
             break;
     }
     
-    TheSoundManager::Instance()->load("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/proceed.aiff", "transitionToGames", SOUND_SFX);
+    TheSoundManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/proceed.aiff", "transitionToGames", SOUND_SFX);
     
-    TheSoundManager::Instance()->load("/Users/floriandutronc/Desktop/SDLDevelopment/SDLDevelopment/SDLDevelopment/assets/Daft_Punk-Arena.wav", "gameSong", SOUND_MUSIC);
+    TheSoundManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/Daft_Punk-Arena.wav", "gameSong", SOUND_MUSIC);
     
     TheSoundManager::Instance()->playSound("transitionToGames", 0);
     TheSoundManager::Instance()->playMusic("gameSong", -1);
@@ -96,6 +99,15 @@ bool PlayState::onExit()
     
     m_gameObjects.clear();
     TheTextureManager::Instance()->clearFromTextureMap("player");
+    switch (m_numOfPlayers) {
+        case 1:
+            TheTextureManager::Instance()->clearFromTextureMap("sampleEnemy");
+            break;
+        case 2:
+            break;
+        default:
+            break;
+    }
     TheSoundManager::Instance()->stopMusic();
     std::cout << "Exiting PlayState" << std::endl;
     return true;
@@ -116,7 +128,7 @@ bool PlayState::checkCollision(SDLGameObject* player, SDLGameObject* player2)
 
 bool PlayState::outOfBounds(SDLGameObject* player)
 {
-    int right = TheGame::Instance()->getWindowWidth() / 1.5;
+    int right = TheGame::Instance()->getWindowWidth() - (TheGame::Instance()->getWindowWidth() / 2.5);
     int left = TheGame::Instance()->getWindowWidth() / 2.5;
     
     if (player->getPosition().getX() < left || player->getPosition().getX() > right) {
@@ -132,10 +144,16 @@ void PlayState::setupFor1Player()
         std::cout << "sample enemy was not found." << std::endl;
     }
     
-    GameObject* sampleEnemy = new SampleEnemy(new LoaderParams(550, 150, 33, 44, "sampleEnemy"));
+    GameObject* sampleEnemy = new SampleEnemy(new LoaderParams(550, 200, 33, 44, "sampleEnemy"));
     m_gameObjects.push_back(sampleEnemy);
 }
 
 void PlayState::setupFor2Players()
 {
+    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/tron_player_small_opposite.png", "player2", TheGame::Instance()->getRenderer())) {
+        std::cout << "player2 loading issue." << std::endl;
+    }
+    
+    GameObject* player2 = new Player(new LoaderParams(550, 200, 20, 71, "player2"), CONTROLLER);
+    m_gameObjects.push_back(player2);
 }
