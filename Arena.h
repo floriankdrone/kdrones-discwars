@@ -8,11 +8,13 @@
 
 #ifndef __Game__Arena__
 #define __Game__Arena__
+#define TIXML_USE_STL
 
 #include <stdio.h>
+#include <string>
 #include <vector>
 
-#include "tinyxml.h"
+#include "tinyxml2.h"
 
 #include "Deadzone.h"
 
@@ -22,15 +24,21 @@ public:
     Arena();
     ~Arena();
     
+    std::string getBackground();
+    std::vector<Coordinate> getWaypoints();
+    std::vector<Deadzone> getDeadzones();
+    bool createArenaFromFile(const char* arenaName);
+    
 private:
-    bool createArenaFromFile(const std::string arenaID);
     
     int m_maxNumOfPlayers;
     int m_with;
     int m_height;
     
-    std::vector<Coordinate> waypoints;
-    std::vector<Deadzone> deadzones;
+    std::string m_background;
+    
+    std::vector<Coordinate> m_waypoints;
+    std::vector<Deadzone> m_deadzones;
 };
 
 #endif /* defined(__Game__Arena__) */

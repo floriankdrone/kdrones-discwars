@@ -9,19 +9,20 @@
 #ifndef Game_Deadzone_h
 #define Game_Deadzone_h
 
+#include <utility>
+
 typedef std::pair<int,int> Coordinate;
 
 class Deadzone
 {
 public:
-
-    Deadzone(int x, int y, int width, int height)
-    {
-        m_startingPoint.first = x;
-        m_startingPoint.second = y;
-        m_width = width;
-        m_height = height;
-    }
+    
+    Deadzone(Coordinate startingpoint, int width, int height);
+    ~Deadzone();
+    
+    Coordinate getCoordinate();
+    int getWidth();
+    int getHeight();
     
 private:
     Coordinate m_startingPoint;

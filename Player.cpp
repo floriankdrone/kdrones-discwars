@@ -21,6 +21,7 @@ Player::Player(const LoaderParams* pParams, InputControllerType inputControllerT
     m_inputControllerType = inputControllerType;
     myDisc = new Disc(new LoaderParams(m_position.getX() + (m_width / 2) - (DISC_RAD / 2), m_position.getY()+(m_height/2) - (DISC_RAD/2), DISC_RAD, DISC_RAD, "disc"));
     hasDisc = true;
+    m_name = pParams->getTextureID();
 }
 
 Player::~Player()
@@ -264,4 +265,9 @@ bool Player::goDown()
 Disc* Player::getMyDisc()
 {
     return myDisc;
+}
+
+std::string Player::getName()
+{
+    return m_name;
 }

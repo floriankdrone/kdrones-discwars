@@ -13,8 +13,9 @@
 #include <vector>
 
 #include "GameState.h"
+#include "Arena.h"
 
-#include "SDLGameObject.h"
+#include "Player.h"
 
 class GameObject;
 
@@ -37,10 +38,11 @@ public:
     
 private:
     
-    void setupFor1Player();
-    void setupFor2Players();
+    bool setupFor1Player(std::vector<Coordinate> waypoints);
+    bool setupFor2Players(std::vector<Coordinate> waypoints);
     
     int m_numOfPlayers;
+    Arena* m_arena;
     static const std::string s_playID;
     std::vector<GameObject*> m_gameObjects;
 };

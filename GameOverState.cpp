@@ -29,8 +29,6 @@ void GameOverState::s_restartToPlay()
 
 bool GameOverState::onEnter()
 {
-    std::cout << m_endString << std::endl;
-    
     if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/main.png", "mainbutton", TheGame::Instance()->getRenderer())) {
         return false;
     }
@@ -46,6 +44,7 @@ bool GameOverState::onEnter()
     m_gameObjects.push_back(button2);
     
     std::cout << "entering GameOver State" << std::endl;
+    
     return true;
 }
 

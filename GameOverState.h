@@ -20,7 +20,7 @@ class GameOverState : public GameState
 {
 public:
     
-    GameOverState(std::string endString){ m_endString = endString; }
+    GameOverState(){}
     ~GameOverState(){}
     
     virtual void update();

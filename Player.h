@@ -34,6 +34,8 @@ public:
     
     Disc* getMyDisc();
     
+    std::string getName();
+    
 private:
     
     void handleInput();
@@ -48,6 +50,8 @@ private:
     
     Disc* myDisc;
     bool hasDisc;
+    
+    std::string m_name;
     
     InputControllerType m_inputControllerType;
     

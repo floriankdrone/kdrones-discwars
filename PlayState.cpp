@@ -13,9 +13,9 @@
 #include "SampleEnemy.h"
 #include "Disc.h"
 
-#include "Game.h"
+#include <sstream>
 
-#include <SDL2_mixer/SDL_mixer.h>
+#include "Game.h"
 
 const std::string PlayState::s_playID = "PLAY";
 
@@ -25,22 +25,35 @@ void PlayState::update()
         m_gameObjects[i]->update();
         
         if (outOfBounds(dynamic_cast<SDLGameObject*>(m_gameObjects[i]))) {
-            TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player fell down!"));
+            TheGame::Instance()->getStateMachine()->changeState(new GameOverState());
         }
     }
-    
-    if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[0]), dynamic_cast<SDLGameObject*>(m_gameObjects[1]))) {
-        TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 wins!"));
+
+    if (m_numOfPlayers == 1) {
+        Player* p = dynamic_cast<Player*>(m_gameObjects[0]);
+        if (checkCollision(p, dynamic_cast<SDLGameObject*>(m_gameObjects[1])))
+        {
+        std::cout << p->getName() << " WINS!" << std::endl;
+        TheGame::Instance()->getStateMachine()->changeState(new GameOverState());
+        }
     }
-    switch (m_numOfPlayers) {
-        case 2:
-            if (checkCollision(dynamic_cast<SDLGameObject*>(m_gameObjects[1]), dynamic_cast<SDLGameObject*>(m_gameObjects[0]))) {
-                TheGame::Instance()->getStateMachine()->changeState(new GameOverState("player 1 loses!"));
+    else
+    {
+        for (int i = 0 ; i < m_numOfPlayers; i++) {
+            Player* p = dynamic_cast<Player*>(m_gameObjects[i]);
+            for (int j =0 ; j < m_numOfPlayers; j++) {
+                if (j == i) {
+                    continue;
+                }
+                Player* p2 = dynamic_cast<Player*>(m_gameObjects[j]);
+                if (checkCollision(p, p2))
+                {
+                    std::cout << p2->getName() << " Got Killed!" << std::endl;
+                    std::cout << p->getName() << " WINS!" << std::endl;
+                    TheGame::Instance()->getStateMachine()->changeState(new GameOverState());
+                }
             }
-            break;
-            
-        default:
-            break;
+        }
     }
 }
 
@@ -54,27 +67,38 @@ void PlayState::render()
 
 bool PlayState::onEnter()
 {
+    m_arena = new Arena();
+    m_arena->createArenaFromFile("default");
     
-    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/play_background1.png", "background", TheGame::Instance()->getRenderer())) {
+    if (!TheTextureManager::Instance()->load(m_arena->getBackground(), "background", TheGame::Instance()->getRenderer())) {
         return false;
     }
     
-    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/tron_player_small.png", "player", TheGame::Instance()->getRenderer())) {
+    std::vector<Coordinate> waypoints = m_arena->getWaypoints();
+    
+    if (waypoints.size() < m_numOfPlayers || waypoints.size() < 2) {
+        std::cout << "Cannot initialise the game since there are not enough waypoints on the map for the number of players" << std::endl;
         return false;
     }
-    
-    GameObject* player = new Player(new LoaderParams(50, 200, 20, 71, "player"), KEYBOARD);
-    
-    m_gameObjects.push_back(player);
     
     switch (m_numOfPlayers) {
         case 1:
+        {
             std::cout << "1 player game launched." << std::endl;
-            setupFor1Player();
+            if(!setupFor1Player(waypoints))
+            {
+                return false;
+            }
             break;
+        }
         case 2:
+        {
             std::cout << "2 player game launched." << std::endl;
-            setupFor2Players();
+            if(!setupFor2Players(waypoints))
+            {
+                return false;
+            }
+        }
         default:
             break;
     }
@@ -104,10 +128,11 @@ bool PlayState::onExit()
             TheTextureManager::Instance()->clearFromTextureMap("sampleEnemy");
             break;
         case 2:
-            break;
+            TheTextureManager::Instance()->clearFromTextureMap("player2");
         default:
             break;
     }
+    delete m_arena;
     TheSoundManager::Instance()->stopMusic();
     std::cout << "Exiting PlayState" << std::endl;
     return true;
@@ -128,32 +153,62 @@ bool PlayState::checkCollision(SDLGameObject* player, SDLGameObject* player2)
 
 bool PlayState::outOfBounds(SDLGameObject* player)
 {
-    int right = TheGame::Instance()->getWindowWidth() - (TheGame::Instance()->getWindowWidth() / 2.5);
-    int left = TheGame::Instance()->getWindowWidth() / 2.5;
+    std::vector<Deadzone> deadzones = m_arena->getDeadzones();
     
-    if (player->getPosition().getX() < left || player->getPosition().getX() > right) {
+    for (int i = 0; i < deadzones.size(); i++) {
+        int left = deadzones[i].getCoordinate().first;
+        int right = deadzones[i].getCoordinate().first + deadzones[i].getWidth();
+        int top = deadzones[i].getCoordinate().second;
+        int bot = deadzones[i].getCoordinate().second + deadzones[i].getHeight();
+        
+        if ((player->getPosition().getX() > left) && (player->getPosition().getX() < right) &&
+            (player->getPosition().getY() > top) && (player->getPosition().getY() < bot)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool PlayState::setupFor1Player(std::vector<Coordinate> waypoints)
+{
+    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/tron_player_small.png", "player", TheGame::Instance()->getRenderer())) {
         return false;
     }
     
-    return true;
-}
-
-void PlayState::setupFor1Player()
-{
+    GameObject* player = new Player(new LoaderParams(50, 200, 20, 71, "player"), KEYBOARD);
+    
+    m_gameObjects.push_back(player);
+    
     if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/rider.png", "sampleEnemy", TheGame::Instance()->getRenderer())) {
-        std::cout << "sample enemy was not found." << std::endl;
+        return false;
     }
     
     GameObject* sampleEnemy = new SampleEnemy(new LoaderParams(550, 200, 33, 44, "sampleEnemy"));
     m_gameObjects.push_back(sampleEnemy);
+    return true;
 }
 
-void PlayState::setupFor2Players()
+bool PlayState::setupFor2Players(std::vector<Coordinate> waypoints)
 {
-    if (!TheTextureManager::Instance()->load("/Users/floriandutronc/Desktop/Game/Game/assets/tron_player_small_opposite.png", "player2", TheGame::Instance()->getRenderer())) {
-        std::cout << "player2 loading issue." << std::endl;
-    }
     
-    GameObject* player2 = new Player(new LoaderParams(550, 200, 20, 71, "player2"), CONTROLLER);
-    m_gameObjects.push_back(player2);
+    for (int i = 0 ; i < m_numOfPlayers; i++) {
+        std::stringstream sstm;
+        sstm << "player" << i;
+        InputControllerType t;
+        std::string s;
+        if (i == 0) {
+            t = KEYBOARD;
+            s = "/Users/floriandutronc/Desktop/Game/Game/assets/tron_player_small.png";
+        } else {
+            t = CONTROLLER;
+            s = "/Users/floriandutronc/Desktop/Game/Game/assets/tron_player_small_opposite.png";
+        }
+        if (!TheTextureManager::Instance()->load(s, sstm.str(), TheGame::Instance()->getRenderer())) {
+            return false;
+        }
+        GameObject* player = new Player(new LoaderParams(waypoints[i].first, waypoints[i].second, 20, 71, sstm.str()), t);
+        m_gameObjects.push_back(player);
+    }
+    return true;
 }
